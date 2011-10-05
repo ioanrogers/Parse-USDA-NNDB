@@ -1,5 +1,7 @@
 package Parse::USDA::NNDB;
 
+# ABSTRACT: download and parse the latest USDA nutritional information database
+
 use v5.10.0;
 use strict;
 use warnings;
@@ -132,51 +134,6 @@ sub parse_file {
     $csv->eof or $csv->error_diag();
     close $fh;
     return \@rows;
-}
-
-sub show_food_by_ndb {
-    my ($self, $ndb) = @_;
-
-    my $food_info = {
-        NDB_No => $ndb,
-        Nutrients => [],
-    };
-
-    my ($cols, $keys) = $self->get_columns_for('FOOD_DES');
-    my $food_des = $self->parse_file('FOOD_DES');
-    
-    # find the food
-    foreach my $d (@{ $food_des }) {
-        next unless $d->{NDB_No} == $ndb;
-        $food_info->{Long_Desc} = $d->{Long_Desc};
-        $food_info->{Shrt_Desc} = $d->{Shrt_Desc};
-    }
-    
-    # get its nutrients
-    my $nut_data = $self->parse_file('NUT_DATA');
-    my @nutrients;
-    foreach my $d (@{ $nut_data }) {
-        next unless $d->{NDB_No} == $ndb;
-        push @nutrients, $d;
-     }
-
-   # get details of nutrients
-    my @nutrients2;
-    my $nut_def = $self->parse_file('NUTR_DEF');
-    foreach my $nut (@nutrients ) {
-        foreach my $d (@{ $nut_def }) {
-            next unless $d->{Nutr_No} == $nut->{Nutr_No};
-            my $nutrient = {
-                Nutr_Val => $nut->{Nutr_Val},
-                Units => $d->{Units},
-                NutrDesc => $d->{NutrDesc},
-            };
-            push @{ $food_info->{Nutrients} }, $nutrient;
-        }
-    }
-   
-   say Dump($food_info);
-
 }
 
 sub _fetch_data {
