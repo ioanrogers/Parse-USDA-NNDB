@@ -12,14 +12,15 @@ use File::HomeDir;
 use File::Spec;
 use URI;
 use File::Fetch;
-use YAML;
+use Log::Any;
 
 # TODO use the updates rather than a whole new db
 
 sub new {
     my ($this, $base_dir)  = @_;
     my $class = ref($this) || $this;
- 
+
+    # TODO better cross-platform defaults
     if (!defined $base_dir) {        
         $base_dir = File::Spec->catdir(File::HomeDir->my_home, '.cache/usda_nndb');
     }
@@ -29,6 +30,7 @@ sub new {
         data_dir => File::Spec->catdir($base_dir, 'sr23'),
         data_uri => URI->new('http://www.ars.usda.gov/SP2UserFiles/Place/12354500/Data/SR23/dnload/sr23.ZIP'),
         zip_file => File::Spec->catfile($base_dir, 'sr23.ZIP'),
+        logger   => Log::Any->get_logger(category => __PACKAGE__),
     };
     
     bless $self, $class;
@@ -39,7 +41,7 @@ sub _get_file_path_for {
     my ($self, $table) = @_;
     
     my $file_path = File::Spec->catfile($self->{data_dir}, $table . ".txt");
-    
+    $self->{logger}->debug("Using path [$file_path] for '$table'");
     return $file_path;
 }
 
@@ -117,9 +119,15 @@ sub parse_file {
             or return 0;
     }
     
-    open my $fh, '<', $file_path
-        or die "$file_path: $!";
-
+    open my $fh, '<', $file_path;
+    
+    # TODO better error handling!
+    if (!$fh) {
+        my $err = 
+        $self->{logger}->crit("Could not open [$file_path]: $!");
+        die;
+    }
+    
     my ($column_names) = $self->get_columns_for($table)
         or return 0;
 
@@ -131,7 +139,13 @@ sub parse_file {
         push @rows, $row;
     }
 
-    $csv->eof or $csv->error_diag();
+    $csv->eof;
+    
+    my ($code, $str, $pos) = $csv->error_diag;
+    if ($str) {
+        $self->{logger}->critf("CSV parse error at %s: %s", $pos, $str);
+    }
+    
     close $fh;
     return \@rows;
 }
