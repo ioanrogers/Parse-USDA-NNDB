@@ -28,9 +28,9 @@ sub new {
     # TODO set up base dir
     my $self = {
         base_dir => $base_dir,
-        data_dir => File::Spec->catdir( $base_dir, 'sr23' ),
-        data_uri => URI->new( 'http://www.ars.usda.gov/SP2UserFiles/Place/12354500/Data/SR23/dnload/sr23.ZIP' ),
-        zip_file => File::Spec->catfile( $base_dir, 'sr23.ZIP' ),
+        data_dir => File::Spec->catdir( $base_dir, 'sr24' ),
+        data_uri => URI->new( 'http://www.ars.usda.gov/SP2UserFiles/Place/12354500/Data/SR24/dnload/sr24.ZIP' ),
+        zip_file => File::Spec->catfile( $base_dir, 'sr24.ZIP' ),
         logger   => Log::Any->get_logger( category => __PACKAGE__ ),
     };
 
@@ -110,6 +110,7 @@ sub parse_file {
             sep_char            => '^',
             allow_loose_escapes => 1,
             auto_diag           => 1,
+            empty_is_undef      => 1,
     } );
     my $file_path = $self->_get_file_path_for( $table );
 
@@ -196,3 +197,7 @@ sub _extract_data {
 1;
 
 __END__
+
+=head1 SEE ALSO
+
+L<USDA National Nutrient Database for Standard Reference|http://www.ars.usda.gov/Services/docs.htm?docid=8964>
