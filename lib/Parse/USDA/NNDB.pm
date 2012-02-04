@@ -2,7 +2,7 @@ package Parse::USDA::NNDB;
 
 # ABSTRACT: download and parse the latest USDA nutritional information database
 
-use v5.10.0;
+use v5.10;
 use strict;
 use warnings;
 
@@ -14,7 +14,10 @@ use URI;
 use File::Fetch;
 use Log::Any;
 
+# XXX file encoding
 # TODO use the updates rather than a whole new db
+# XXX option to download old releases?
+# TODO progress bars... hardcode lines per file as they will only change once per year...
 
 sub new {
     my ( $this, $base_dir ) = @_;
@@ -47,7 +50,7 @@ sub _get_file_path_for {
 }
 
 sub tables {
-    return qw/DATSRCLN FD_GROUP FOOTNOTE NUTR_DEF SRC_CD DATA_SRC DERIV_CD FOOD_DES NUT_DATA WEIGHT/;
+    return qw/DATSRCLN FD_GROUP LANGUAL LANGDESC FOOTNOTE NUTR_DEF SRC_CD DATA_SRC DERIV_CD FOOD_DES NUT_DATA WEIGHT/;
 }
 
 sub get_columns_for {
@@ -57,47 +60,52 @@ sub get_columns_for {
         when ( /^FOOD_DES$/i ) {
             return [
                 qw/NDB_No FdGrp_Cd Long_Desc Shrt_Desc ComName ManufacName Survey Ref_desc Refuse SciName N_Factor Pro_Factor Fat_Factor CHO_Factor/
-              ],
-              [qw/0 1/]
+              ];
         }
         when ( /^FD_GROUP$/i ) {
-            return [qw/FdGrp_Cd FdGrp_Desc/]
+            return [qw/FdGrp_Cd FdGrp_Desc/];
+        }
+        when ( /^LANGUAL$/i ) {
+            return [qw/NDB_No Factor_Code/];
+        }
+        when ( /^LANGDESC$/i ) {
+            return [qw/Factor_Code Description/];
         }
         when ( /^NUT_DATA$/i ) {
-            return ( [
+            return [
                     qw/NDB_No Nutr_No Nutr_Val Num_Data_Pts Std_Error Src_Cd Deriv_Cd Ref_NDB_No Add_Nutr_Mark Num_Studies Min Max DF Low_EB Up_EB Stat_cmt CC/
-                ],
-                [qw/0 1/] )
+                ];
+                
         }
         when ( /^NUTR_DEF$/i ) {
-            return ( [qw(Nutr_No Units Tagname NutrDesc Num_Desc SR_Order)], qw/0/ )
+            return [qw(Nutr_No Units Tagname NutrDesc Num_Dec SR_Order)];
         }
         when ( /^SRC_CD$/i ) {
-            return 0, [qw(Src_Cd SrcCd_Desc)]
+            return [qw(Src_Cd SrcCd_Desc)];
         }
         when ( /^DERIV_CD$/i ) {
-            return 0, [qw(Deriv_Cd Deriv_Desc)]
+            return [qw(Deriv_Cd Deriv_Desc)];
         }
         when ( /^WEIGHT$/i ) {
-            return 0, [qw(NDB_No Seq Amount Msre_Desc Gm_Wgt Num_Data_Pts Std_Dev)]
+            return [qw(NDB_No Seq Amount Msre_Desc Gm_Wgt Num_Data_Pts Std_Dev)];
         }
         when ( /^FOOTNOTE$/i ) {
-            return 0, [qw(NDB_No Footnt_No Footnt_Typ Nutr_No Footnt_Txt)]
+            return [qw(NDB_No Footnt_No Footnt_Typ Nutr_No Footnt_Txt)];
         }
         when ( /^DATSRCLN$/i ) {
-            return 0, [qw(NDB_No Nutr_No DataSrc_ID)]
+            return [qw(NDB_No Nutr_No DataSrc_ID)];
         }
         when ( /^DATA_SRC$/i ) {
-            return 0, [qw(DataSrc_ID Authors Title Year Journal Vol_City Issue_State Start_Page End_Page)]
+            return [qw(DataSrc_ID Authors Title Year Journal Vol_City Issue_State Start_Page End_Page)];
         }
-        when ( /^ABBREV$/i ) {
-            return [
-                qw(NDB_No Shrt_Desc Water Energ_Kcal Protein Lipit_Tot Ash Carbonhydrt Fiber_TD Sugar_Tot Calcium Iron Magnesium Phosphorus Potassium Sodium Zinc Copper Manganese Selenium Vit_C Thiamin Riboflavin Niacin Panto_acid Vit_B6 Folate_Tot Folic_acid Food_Folate Folate_DFE Choline_total Vit_B12 Vit_A_IU Vit_A_RAE Retinol Alpha_Carot Beta_Carot Beta_Crypt Lycopene Lut_and_Zea Vit_E Vit_K FA_Sat FA_Mono FA_Poly Cholestrl GmWt_1 GmWt_Desc1 GmWt_2 GmWt_Desc2 Refuse_Pct)
-              ]
-        }
+        #when ( /^ABBREV$/i ) {
+        #    return [
+        #        qw(NDB_No Shrt_Desc Water Energ_Kcal Protein Lipit_Tot Ash Carbonhydrt Fiber_TD Sugar_Tot Calcium Iron Magnesium Phosphorus Potassium Sodium Zinc Copper Manganese Selenium Vit_C Thiamin Riboflavin Niacin Panto_acid Vit_B6 Folate_Tot Folic_acid Food_Folate Folate_DFE Choline_total Vit_B12 Vit_A_IU Vit_A_RAE Retinol Alpha_Carot Beta_Carot Beta_Crypt Lycopene Lut_and_Zea Vit_E Vit_K FA_Sat FA_Mono FA_Poly Cholestrl GmWt_1 GmWt_Desc1 GmWt_2 GmWt_Desc2 Refuse_Pct)
+        #      ];
+        #}
         default {
-            warn "Unknown table '$table' requested\n";
-            return 0;
+            warn "Unknown table [$table] requested\n";
+            return;
         }
     }
 }
@@ -111,6 +119,7 @@ sub parse_file {
             allow_loose_escapes => 1,
             auto_diag           => 1,
             empty_is_undef      => 1,
+            binary              => 1,
     } );
     my $file_path = $self->_get_file_path_for( $table );
 
@@ -127,14 +136,14 @@ sub parse_file {
         die;
     }
 
-    my ( $column_names ) = $self->get_columns_for( $table )
-      or return 0;
+    my $column_names = $self->get_columns_for( $table )
+        or return 0;
 
     $csv->column_names( $column_names );
 
     my @rows;
     while ( my $row = $csv->getline_hr( $fh ) ) {
-
+        # TODO user supplied callback to normalise fields?
         push @rows, $row;
     }
 
@@ -197,6 +206,16 @@ sub _extract_data {
 1;
 
 __END__
+
+=head1 SYNOPSIS
+  
+  use Parse::USDA::NNDB;
+  my $usda = Parse::USDA::NNDB->new($optional_cache_dir);
+  $usda->parse_file( 'FD_GROUP' );
+  foreach my $fg ( @{$food_groups} ) {
+      printf "ID: %s  DESC: %s\n", $fg->{NDB_No}, $fg->{Shrt_Desc};
+  }
+
 
 =head1 SEE ALSO
 
