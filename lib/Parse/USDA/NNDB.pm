@@ -230,7 +230,45 @@ __END__
       printf "ID: %s  DESC: %s\n", $fg->{NDB_No}, $fg->{Shrt_Desc};
   }
 
+=head1 DESCRIPTION
+
+Parse::USDA::NNDB is for parsing the nutrient data files made available by the
+USDA in ASCII format. If the files are not available, they will be automatically 
+retrieved and extracted for you.
+
+=head1 METHODS
+
+=over
+
+=item new($basedir)
+
+Creates a new Parse::USDA::NNDB object. Takes one optional argument, a path
+to the dir which contains the datafiles to be parsed.
+
+=item B<open_file($table)>
+
+Call with the case-insensitive name of the file, without extension, to open.
+You must call this before B<get_line>.
+
+Returns true on success.
+
+=item B<get_line>
+
+After B<open_file>, keep calling this to get the next line. Each line is a
+hashref (see USDA docs for their meanings).
+
+Returns undef when the file is finished or if something goes wrong.
+
+=item B<tables>
+
+Returns a list of all the known tables/filenames.
+
+=item B<get_columns_for($table)>
+
+Returns a list of the keys used in this file.
+
+=back
 
 =head1 SEE ALSO
 
-L<USDA National Nutrient Database for Standard Reference|http://www.ars.usda.gov/Services/docs.htm?docid=8964>
+L<USDA documentation|http://www.ars.usda.gov/Services/docs.htm?docid=8964>
