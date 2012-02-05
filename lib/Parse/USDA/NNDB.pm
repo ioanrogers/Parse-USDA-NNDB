@@ -117,7 +117,6 @@ sub open_file {
             quote_char          => '~',
             sep_char            => '^',
             allow_loose_escapes => 1,
-            auto_diag           => 1,
             empty_is_undef      => 1,
             binary              => 1,
     } );
@@ -159,13 +158,14 @@ sub get_line {
     my $row = $self->{csv}->getline_hr( $self->{fh} );
     
     if ($self->{csv}->eof) {
+        $self->{logger}->debug('Closing file');
         $self->{fh}->close;
         $self->{fh} = undef;
     }
     
     my ( $code, $str, $pos ) = $self->{csv}->error_diag;
-    if ( $str ) {
-        $self->{logger}->critf( "CSV parse error at %s: %s", $pos, $str );
+    if ( $str && !$self->{csv}->eof ) {
+        $self->{logger}->critf( "CSV parse error at pos %s: %s [%s]", $pos, $str, $self->{csv}->error_input );
         return;
     }
 
@@ -190,13 +190,12 @@ sub _fetch_data {
 
     my $ff = File::Fetch->new( uri => $self->{data_uri} );
 
-    say "Downloading " . $self->{data_uri} . " to " . $self->{base_dir};
+    $self->{logger}->info("Downloading " . $self->{data_uri} . " to " . $self->{base_dir});
     my $file = $ff->fetch( to => $self->{base_dir} )
-      or warn $ff->error;
+      or $self->{logger}->warn($ff->error);
 
     $self->{zip_file} = $file;    # should have been the same anyway
-    say "Saved data to $file";
-
+    $self->{logger}->info("Saved data to $file");
     $self->_extract_data;
 
     return 1;
@@ -208,7 +207,7 @@ sub _extract_data {
     my $zip = Archive::Zip->new;
 
     unless ( $zip->read( $self->{zip_file} ) == AZ_OK ) {
-        warn "Read error";
+        $self->{logger}->error('Read error');
         return 0;
     }
 

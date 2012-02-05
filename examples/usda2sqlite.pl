@@ -8,6 +8,7 @@ use File::Basename;
 use File::Spec::Functions;
 use Parse::USDA::NNDB;
 use ORLite qw//;
+use Log::Any::Adapter;
 
 my $dir;
 my $db_file;
@@ -77,6 +78,10 @@ sub do_table {
     
     print "\n\n";
 }
+
+Log::Any::Adapter->set('ScreenColoredLevel',
+    min_level => 'debug',
+);
 
 $dir = dirname($0);
 $db_file = catfile($dir,'usda_nut.sqlite');
