@@ -2,3 +2,4 @@
 Parse-USDA-NNDB-*
 *~
 data
+examples/*.sqlite
