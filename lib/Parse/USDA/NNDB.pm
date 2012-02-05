@@ -1,6 +1,6 @@
 package Parse::USDA::NNDB;
 
-# ABSTRACT: download and parse the latest USDA nutritional information database
+# ABSTRACT: download and parse the latest USDA National Nutrient Database
 
 use v5.10;
 use strict;
@@ -60,7 +60,7 @@ sub get_columns_for {
         when ( /^FOOD_DES$/i ) {
             return [
                 qw/NDB_No FdGrp_Cd Long_Desc Shrt_Desc ComName ManufacName Survey Ref_desc Refuse SciName N_Factor Pro_Factor Fat_Factor CHO_Factor/
-              ];
+            ];
         }
         when ( /^FD_GROUP$/i ) {
             return [qw/FdGrp_Cd FdGrp_Desc/];
@@ -73,9 +73,9 @@ sub get_columns_for {
         }
         when ( /^NUT_DATA$/i ) {
             return [
-                    qw/NDB_No Nutr_No Nutr_Val Num_Data_Pts Std_Error Src_Cd Deriv_Cd Ref_NDB_No Add_Nutr_Mark Num_Studies Min Max DF Low_EB Up_EB Stat_cmt CC/
-                ];
-                
+                qw/NDB_No Nutr_No Nutr_Val Num_Data_Pts Std_Error Src_Cd Deriv_Cd Ref_NDB_No Add_Nutr_Mark Num_Studies Min Max DF Low_EB Up_EB Stat_cmt CC/
+            ];
+
         }
         when ( /^NUTR_DEF$/i ) {
             return [qw(Nutr_No Units Tagname NutrDesc Num_Dec SR_Order)];
@@ -98,11 +98,12 @@ sub get_columns_for {
         when ( /^DATA_SRC$/i ) {
             return [qw(DataSrc_ID Authors Title Year Journal Vol_City Issue_State Start_Page End_Page)];
         }
-        #when ( /^ABBREV$/i ) {
-        #    return [
-        #        qw(NDB_No Shrt_Desc Water Energ_Kcal Protein Lipit_Tot Ash Carbonhydrt Fiber_TD Sugar_Tot Calcium Iron Magnesium Phosphorus Potassium Sodium Zinc Copper Manganese Selenium Vit_C Thiamin Riboflavin Niacin Panto_acid Vit_B6 Folate_Tot Folic_acid Food_Folate Folate_DFE Choline_total Vit_B12 Vit_A_IU Vit_A_RAE Retinol Alpha_Carot Beta_Carot Beta_Crypt Lycopene Lut_and_Zea Vit_E Vit_K FA_Sat FA_Mono FA_Poly Cholestrl GmWt_1 GmWt_Desc1 GmWt_2 GmWt_Desc2 Refuse_Pct)
-        #      ];
-        #}
+
+#when ( /^ABBREV$/i ) {
+#    return [
+#        qw(NDB_No Shrt_Desc Water Energ_Kcal Protein Lipit_Tot Ash Carbonhydrt Fiber_TD Sugar_Tot Calcium Iron Magnesium Phosphorus Potassium Sodium Zinc Copper Manganese Selenium Vit_C Thiamin Riboflavin Niacin Panto_acid Vit_B6 Folate_Tot Folic_acid Food_Folate Folate_DFE Choline_total Vit_B12 Vit_A_IU Vit_A_RAE Retinol Alpha_Carot Beta_Carot Beta_Crypt Lycopene Lut_and_Zea Vit_E Vit_K FA_Sat FA_Mono FA_Poly Cholestrl GmWt_1 GmWt_Desc1 GmWt_2 GmWt_Desc2 Refuse_Pct)
+#      ];
+#}
         default {
             warn "Unknown table [$table] requested\n";
             return;
@@ -136,33 +137,33 @@ sub open_file {
     }
 
     my $column_names = $self->get_columns_for( $table )
-        or return 0;
+      or return 0;
 
     $csv->column_names( $column_names );
-    $self->{fh} = $fh;
+    $self->{fh}  = $fh;
     $self->{csv} = $csv;
-    
+
     return 1;
 }
 
 sub get_line {
     my $self = shift;
 
-    if (!defined $self->{fh}) {
+    if ( !defined $self->{fh} ) {
         die "No active filehandle. Did you call open_file first?\n";
     }
-    if (!defined $self->{csv}) {
+    if ( !defined $self->{csv} ) {
         die "No csv object. Did you call open_file first?\n";
     }
-    
+
     my $row = $self->{csv}->getline_hr( $self->{fh} );
-    
-    if ($self->{csv}->eof) {
-        $self->{logger}->debug('Closing file');
+
+    if ( $self->{csv}->eof ) {
+        $self->{logger}->debug( 'Closing file' );
         $self->{fh}->close;
         $self->{fh} = undef;
     }
-    
+
     my ( $code, $str, $pos ) = $self->{csv}->error_diag;
     if ( $str && !$self->{csv}->eof ) {
         $self->{logger}->critf( "CSV parse error at pos %s: %s [%s]", $pos, $str, $self->{csv}->error_input );
@@ -190,12 +191,12 @@ sub _fetch_data {
 
     my $ff = File::Fetch->new( uri => $self->{data_uri} );
 
-    $self->{logger}->info("Downloading " . $self->{data_uri} . " to " . $self->{base_dir});
+    $self->{logger}->info( "Downloading " . $self->{data_uri} . " to " . $self->{base_dir} );
     my $file = $ff->fetch( to => $self->{base_dir} )
-      or $self->{logger}->warn($ff->error);
+      or $self->{logger}->warn( $ff->error );
 
     $self->{zip_file} = $file;    # should have been the same anyway
-    $self->{logger}->info("Saved data to $file");
+    $self->{logger}->info( "Saved data to $file" );
     $self->_extract_data;
 
     return 1;
@@ -207,7 +208,7 @@ sub _extract_data {
     my $zip = Archive::Zip->new;
 
     unless ( $zip->read( $self->{zip_file} ) == AZ_OK ) {
-        $self->{logger}->error('Read error');
+        $self->{logger}->error( 'Read error' );
         return 0;
     }
 
