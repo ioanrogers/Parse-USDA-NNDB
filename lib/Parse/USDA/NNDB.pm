@@ -128,7 +128,7 @@ sub parse_file {
           or return 0;
     }
 
-    open my $fh, '<', $file_path;
+    open my $fh, '<:encoding(iso-8859-1)', $file_path;
 
     # TODO better error handling!
     if ( !$fh ) {
