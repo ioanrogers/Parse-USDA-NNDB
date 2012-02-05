@@ -60,13 +60,12 @@ sub do_table {
     
     say "### $table ###";
     
-    # get an array of hashes
-    my $raw_data = $usda->parse_file( $table );
+    $usda->open_file( $table );
     
     my $pkg = normalise_table_name($table);
     
     NutDB->begin;
-    foreach my $rd ( @{$raw_data} ) {
+    while ( my $rd = $usda->get_line ) {
         my $data = normalise_keys($rd);
         if ( $pkg->can('create') ) {
             my $n = $pkg->create(%{$data});

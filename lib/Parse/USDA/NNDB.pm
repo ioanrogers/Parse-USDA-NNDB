@@ -110,7 +110,7 @@ sub get_columns_for {
     }
 }
 
-sub parse_file {
+sub open_file {
     my ( $self, $table ) = @_;
 
     my $csv = Text::CSV_XS->new( {
@@ -140,22 +140,36 @@ sub parse_file {
         or return 0;
 
     $csv->column_names( $column_names );
+    $self->{fh} = $fh;
+    $self->{csv} = $csv;
+    
+    return 1;
+}
 
-    my @rows;
-    while ( my $row = $csv->getline_hr( $fh ) ) {
-        # TODO user supplied callback to normalise fields?
-        push @rows, $row;
+sub get_line {
+    my $self = shift;
+
+    if (!defined $self->{fh}) {
+        die "No active filehandle. Did you call open_file first?\n";
     }
-
-    $csv->eof;
-
-    my ( $code, $str, $pos ) = $csv->error_diag;
+    if (!defined $self->{csv}) {
+        die "No csv object. Did you call open_file first?\n";
+    }
+    
+    my $row = $self->{csv}->getline_hr( $self->{fh} );
+    
+    if ($self->{csv}->eof) {
+        $self->{fh}->close;
+        $self->{fh} = undef;
+    }
+    
+    my ( $code, $str, $pos ) = $self->{csv}->error_diag;
     if ( $str ) {
         $self->{logger}->critf( "CSV parse error at %s: %s", $pos, $str );
+        return;
     }
 
-    close $fh;
-    return \@rows;
+    return $row;
 }
 
 sub _fetch_data {
@@ -211,8 +225,8 @@ __END__
   
   use Parse::USDA::NNDB;
   my $usda = Parse::USDA::NNDB->new($optional_cache_dir);
-  $usda->parse_file( 'FD_GROUP' );
-  foreach my $fg ( @{$food_groups} ) {
+  $usda->open_file( 'FD_GROUP' );
+  while (my $fg = $usda->getline) {
       printf "ID: %s  DESC: %s\n", $fg->{NDB_No}, $fg->{Shrt_Desc};
   }
 
