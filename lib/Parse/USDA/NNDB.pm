@@ -240,7 +240,7 @@ retrieved and extracted for you.
 
 =over
 
-=item new($basedir)
+=item B<new($basedir)>
 
 Creates a new Parse::USDA::NNDB object. Takes one optional argument, a path
 to the dir which contains the datafiles to be parsed.
