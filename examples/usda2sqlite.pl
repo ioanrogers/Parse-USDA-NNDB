@@ -15,14 +15,14 @@ my $db_file;
 my $usda = Parse::USDA::NNDB->new;
 
 sub create_tables {
-    my $sql_file = catfile( $dir, 'usda_sqlite.sql' );
+    my $sql_file = catfile($dir, 'usda_sqlite.sql');
 
     say 'Creating database';
     open my $fh, '<', $sql_file
       or die "Failed to open SQL file: $!";
 
     system "sqlite3 $db_file < $sql_file";
-    if ( $? != 0 ) {
+    if ($? != 0) {
         die "system failed: $?";
     }
 
@@ -30,9 +30,9 @@ sub create_tables {
 }
 
 sub get_keys {
-    my ( $table ) = @_;
-    my $cols = $usda->get_columns_for( $table );
-    if ( !defined $cols ) {
+    my ($table) = @_;
+    my $cols = $usda->get_columns_for($table);
+    if (!defined $cols) {
         die;
     }
     return $cols;
@@ -40,14 +40,14 @@ sub get_keys {
 
 sub normalise_keys {
     my $item = shift;
-    my %data = map { lc( $_ ) => $item->{$_} } keys %{$item};
+    my %data = map { lc($_) => $item->{$_} } keys %{$item};
     return \%data;
 }
 
 # from orlite
 sub normalise_table_name {
     my $table = shift;
-    if ( $table ne lc $table ) {
+    if ($table ne lc $table) {
         $table =~ s/([a-z])([A-Z])/${1}_${2}/g;
         $table =~ s/_+/_/g;
     }
@@ -62,15 +62,15 @@ sub do_table {
 
     say "### $table ###";
 
-    $usda->table( $table );
+    $usda->table($table);
 
-    my $pkg = normalise_table_name( $table );
+    my $pkg = normalise_table_name($table);
 
     NutDB->begin;
-    while ( my $rd = $usda->get_line ) {
-        my $data = normalise_keys( $rd );
-        if ( $pkg->can( 'create' ) ) {
-            my $n = $pkg->create( %{$data} );
+    while (my $rd = $usda->get_line) {
+        my $data = normalise_keys($rd);
+        if ($pkg->can('create')) {
+            my $n = $pkg->create(%{$data});
         } else {
             die "$pkg has no create method - DID YOU MAKE ANOTHER TYPO!?";
         }
@@ -80,17 +80,17 @@ sub do_table {
     print "\n\n";
 }
 
-Log::Any::Adapter->set( 'ScreenColoredLevel', min_level => 'debug', );
+Log::Any::Adapter->set('ScreenColoredLevel', min_level => 'debug',);
 
-$dir = dirname( $0 );
-$db_file = catfile( $dir, 'usda_nut.sqlite' );
+$dir = dirname($0);
+$db_file = catfile($dir, 'usda_nut.sqlite');
 
-my $db = ORLite->import( {
-        package => 'NutDB',
-        file    => $db_file,
-        create  => \&create_tables,
-} );
+my $db = ORLite->import({
+    package => 'NutDB',
+    file    => $db_file,
+    create  => \&create_tables,
+});
 
-foreach my $table ( @{$usda->tables} ) {
+foreach my $table (@{$usda->tables}) {
     do_table($table);
 }
