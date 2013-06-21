@@ -182,7 +182,7 @@ method get_columns_for ($table) {
 
 =method C<table ($table)>
 
-Given a table name, this method sets the current active table
+Given a case-insenstive table name, this method sets the current active table
 and opens the file ready for parsing. You must call this before B<get_line>.
 
 Returns true on success, throws an exception on error.
@@ -190,7 +190,7 @@ Returns true on success, throws an exception on error.
 =cut
 
 method table ($table) {
-
+    $table = uc $table;
     my $file_path = $self->_get_file_path_for($table);
 
     open my $fh, '<:encoding(iso-8859-1)', $file_path
