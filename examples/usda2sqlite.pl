@@ -1,4 +1,4 @@
-#!env perl
+#!/usr/bin/env perl
 
 use v5.10;
 use strict;
@@ -17,6 +17,7 @@ my $usda = Parse::USDA::NNDB->new;
 sub create_tables {
     my $sql_file = catfile( $dir, 'usda_sqlite.sql' );
 
+    say 'Creating database';
     open my $fh, '<', $sql_file
       or die "Failed to open SQL file: $!";
 
@@ -61,7 +62,7 @@ sub do_table {
 
     say "### $table ###";
 
-    $usda->open_file( $table );
+    $usda->table( $table );
 
     my $pkg = normalise_table_name( $table );
 
@@ -90,8 +91,6 @@ my $db = ORLite->import( {
         create  => \&create_tables,
 } );
 
-my @tables = $usda->tables;
-
-foreach my $table ( @tables ) {
-    do_table( $table );
+foreach my $table ( @{$usda->tables} ) {
+    do_table($table);
 }

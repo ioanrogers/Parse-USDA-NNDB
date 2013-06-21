@@ -2,59 +2,117 @@ package Parse::USDA::NNDB;
 
 # ABSTRACT: download and parse the latest USDA National Nutrient Database
 
-use v5.10;
-use strict;
-use warnings;
+use v5.10.1;
+use Moo;
 
-use Text::CSV_XS;
+use autodie;
 use Archive::Zip qw/ :ERROR_CODES :CONSTANTS /;
-use File::HomeDir;
-use File::Spec;
-use URI;
+use Carp qw/croak/;
 use File::Fetch;
+use File::HomeDir;
+#use IO::Uncompress::Unzip;
 use Log::Any;
+use methods;
+use Text::CSV_XS;
+use Path::Tiny;
+use URI;
+
+no if $] >= 5.018, 'warnings', 'experimental::smartmatch';
+
+with qw/MooX::Log::Any/;
 
 # XXX file encoding
 # TODO use the updates rather than a whole new db
 # XXX option to download old releases?
-# TODO progress bars... hardcode lines per file as they will only change once per year...
+# TODO progress bars...
 
-sub new {
-    my ( $this, $base_dir ) = @_;
-    my $class = ref( $this ) || $this;
+=attr C<base_dir>
 
+This is ithe directory into which the data files will be downloaded.
+Defaults to $HOME/.cache/usda_nndb
+
+=cut
+has base_dir => ( is => 'lazy' );
+has _data_dir => ( is => 'lazy' );
+has _src_uri  => ( is => 'lazy' );
+has _src_file => ( is => 'lazy',);
+has _fh => ( is => 'rw', predicate => 1, clearer => 1);
+has _csv => (is => 'lazy', predicate => 1, clearer => 1);
+
+=attr C<tables>
+
+An arrayref of all the known tables.
+
+=cut
+has tables => (
+    is => 'ro',
+    default => sub {[
+        qw/DATSRCLN FD_GROUP LANGUAL LANGDESC FOOTNOTE NUTR_DEF SRC_CD DATA_SRC DERIV_CD FOOD_DES NUT_DATA WEIGHT/
+    ]},
+);
+
+method _build_base_dir {
     # TODO better cross-platform defaults
-    if ( !defined $base_dir ) {
-        $base_dir = File::Spec->catdir( File::HomeDir->my_home, '.cache/usda_nndb' );
+    my $dir = path(File::HomeDir->my_home, '.cache/usda_nndb');
+    if (!$dir->exists) {
+        $dir->mkpath;
+    }
+    return $dir;
+}
+
+method _build__data_dir {
+    my $dir = $self->base_dir->child('sr24');
+    if (!$dir->exists) {
+        $dir->mkpath;
+    }
+    return $dir;
+}
+
+method _build__src_uri {
+    URI->new( 'http://www.ars.usda.gov/SP2UserFiles/Place/12354500/Data/SR24/dnload/sr24.ZIP' ),
+}
+
+method _build__src_file {
+    $self->base_dir->child('sr24.ZIP');
+}
+
+method _build__csv {
+    return Text::CSV_XS->new( {
+            quote_char          => '~',
+            escape_char         => '~',
+            sep_char            => '^',
+            empty_is_undef      => 1,
+            binary              => 1,
+    } );
+}
+
+method _log_croak($msg) {
+    $self->log->crit($msg);
+    croak $msg;
+}
+
+method _log_croakf(@args) {
+    my $msg = sprintf shift @args, @args;
+    $self->_log_croak($msg);
+}
+
+method _get_file_path_for($table) {
+    my $file = $self->_data_dir->child("$table.txt");
+    $self->logger->debug( "Using path [$file] for '$table'" );
+    if ( !$file->exists ) {
+          $self->_extract_data;
     }
 
-    # TODO set up base dir
-    my $self = {
-        base_dir => $base_dir,
-        data_dir => File::Spec->catdir( $base_dir, 'sr24' ),
-        data_uri => URI->new( 'http://www.ars.usda.gov/SP2UserFiles/Place/12354500/Data/SR24/dnload/sr24.ZIP' ),
-        zip_file => File::Spec->catfile( $base_dir, 'sr24.ZIP' ),
-        logger   => Log::Any->get_logger( category => __PACKAGE__ ),
-    };
-
-    bless $self, $class;
-    return $self;
+    return $file;
 }
 
-sub _get_file_path_for {
-    my ( $self, $table ) = @_;
+=attr C<get_columns_for($table)>
 
-    my $file_path = File::Spec->catfile( $self->{data_dir}, $table . ".txt" );
-    $self->{logger}->debug( "Using path [$file_path] for '$table'" );
-    return $file_path;
-}
+Returns an arrayref of the column names used in this table, or undef if the
+table is unknown
 
-sub tables {
-    return qw/DATSRCLN FD_GROUP LANGUAL LANGDESC FOOTNOTE NUTR_DEF SRC_CD DATA_SRC DERIV_CD FOOD_DES NUT_DATA WEIGHT/;
-}
-
-sub get_columns_for {
-    my ( $self, $table ) = @_;
+=cut
+method get_columns_for($table) {
 
     given ( $table ) {
         when ( /^FOOD_DES$/i ) {
@@ -105,116 +163,102 @@ sub get_columns_for {
 #      ];
 #}
         default {
-            warn "Unknown table [$table] requested\n";
             return;
         }
     }
 }
 
-sub open_file {
-    my ( $self, $table ) = @_;
+=method C<table ($table)>
 
-    my $csv = Text::CSV_XS->new( {
-            quote_char          => '~',
-            sep_char            => '^',
-            allow_loose_escapes => 1,
-            empty_is_undef      => 1,
-            binary              => 1,
-    } );
+Given a table name, this method sets the current active table
+and opens the file ready for parsing. You must call this before B<get_line>.
+
+Returns true on success, throws an exception on error.
+
+=cut
+method table($table) {
+
     my $file_path = $self->_get_file_path_for( $table );
 
-    if ( !-e $file_path ) {
-        $self->_fetch_data
-          or return 0;
-    }
-
-    open my $fh, '<:encoding(iso-8859-1)', $file_path;
-
-    # TODO better error handling!
-    if ( !$fh ) {
-        my $err = $self->{logger}->crit( "Could not open [$file_path]: $!" );
-        die;
-    }
+    open my $fh, '<:encoding(iso-8859-1)', $file_path
+        or $self->_log_croak( "Could not open [$file_path]: $!" );
 
     my $column_names = $self->get_columns_for( $table )
-      or return 0;
+      or $self->_log_croak("Couldn't find columns for [$table]");
 
-    $csv->column_names( $column_names );
-    $self->{fh}  = $fh;
-    $self->{csv} = $csv;
+    $self->_csv->column_names( $column_names );
+    $self->_fh($fh);
 
     return 1;
 }
 
-sub get_line {
-    my $self = shift;
+=item C<get_line>
 
-    if ( !defined $self->{fh} ) {
-        die "No active filehandle. Did you call open_file first?\n";
+Returns the next line in the data file and returns a hashref
+(see USDA docs for their meanings).
+
+Returns undef when the file is finished or if something goes wrong.
+
+=cut
+method get_line {
+    if (!$self->_has_fh) {
+        $self->_log_croak('No active filehandle. Did you call \'table\' first?');
+        # TODO should check the handle is the *right* handle
     }
-    if ( !defined $self->{csv} ) {
-        die "No csv object. Did you call open_file first?\n";
+    if (!$self->_has_csv) {
+        $self->_log_croak('No csv object. Did you call \'table\' first?');
     }
 
-    my $row = $self->{csv}->getline_hr( $self->{fh} );
+    my $row = $self->_csv->getline_hr( $self->_fh );
 
-    if ( $self->{csv}->eof ) {
-        $self->{logger}->debug( 'Closing file' );
-        $self->{fh}->close;
-        $self->{fh} = undef;
+    if ( $self->_csv->eof ) {
+        $self->logger->debug( 'Closing file' );
+        $self->_fh->close;
+        $self->_clear_fh;
+        $self->_clear_csv;
     }
+#    use Data::Printer; p $row;
+    my ( $code, $str, $pos ) = $self->_csv->error_diag;
+    if ( $str && !$self->_csv->eof ) {
 
-    my ( $code, $str, $pos ) = $self->{csv}->error_diag;
-    if ( $str && !$self->{csv}->eof ) {
-        $self->{logger}->critf( "CSV parse error at pos %s: %s [%s]", $pos, $str, $self->{csv}->error_input );
-        return;
+        $self->_log_croakf('CSV parse error at pos %s: %s [%s]', $pos, $str, $self->_csv->error_input );
     }
 
     return $row;
 }
 
-sub _fetch_data {
-    my $self = shift;
-
+method _fetch_data {
     # does zip already exist?
-    if ( -e $self->{zip_file} ) {
-        if ( !$self->_extract_data ) {
+    # TODO any checksums we can use?
 
-            # failed to extract, file is corrupt? User should try again
-            unlink $self->{zip_file}
-              or die sprintf "Failed to remove cached file '%s': %s\n", $self->{zip_file}, $!;
-        } else {
-            return 1;
-        }
+    my $ff = File::Fetch->new( uri => $self->_src_uri );
 
-    }
+    $self->logger->debug( "Downloading " . $self->_src_uri . " to " . $self->base_dir );
+    my $file = $ff->fetch( to => $self->base_dir )
+      or $self->logger->log_and_croak( $ff->error );
 
-    my $ff = File::Fetch->new( uri => $self->{data_uri} );
-
-    $self->{logger}->info( "Downloading " . $self->{data_uri} . " to " . $self->{base_dir} );
-    my $file = $ff->fetch( to => $self->{base_dir} )
-      or $self->{logger}->warn( $ff->error );
-
-    $self->{zip_file} = $file;    # should have been the same anyway
-    $self->{logger}->info( "Saved data to $file" );
-    $self->_extract_data;
+    $self->logger->debug( "Saved data to $file" );
 
     return 1;
 }
 
-sub _extract_data {
-    my $self = shift;
-
-    my $zip = Archive::Zip->new;
-
-    unless ( $zip->read( $self->{zip_file} ) == AZ_OK ) {
-        $self->{logger}->error( 'Read error' );
-        return 0;
+method _extract_data {
+    if (!$self->_src_file->exists) {
+        $self->_fetch_data;
     }
 
-    $zip->extractTree( undef, $self->{data_dir} . "/" );
+    $self->log->debug('Extracting file ' . $self->_src_file);
+    my $zip = Archive::Zip->new;
 
-    return 1;
+    unless ( $zip->read( $self->_src_file->stringify ) == AZ_OK ) {
+        $self->logger->error( 'Read error' );
+        croak;
+    }
+
+    my $ok = $zip->extractTree( undef, $self->_data_dir->stringify . '/');
+
+    return 1 if $ok == AZ_OK;
+    croak "Failed to extract file";
 }
 
 1;
@@ -222,10 +266,10 @@ sub _extract_data {
 __END__
 
 =head1 SYNOPSIS
-  
+
   use Parse::USDA::NNDB;
-  my $usda = Parse::USDA::NNDB->new($optional_cache_dir);
-  $usda->open_file( 'FD_GROUP' );
+  my $usda = Parse::USDA::NNDB->new;
+  $usda->table( 'fd_group' );
   while (my $fg = $usda->getline) {
       printf "ID: %s  DESC: %s\n", $fg->{NDB_No}, $fg->{Shrt_Desc};
   }
@@ -233,41 +277,17 @@ __END__
 =head1 DESCRIPTION
 
 Parse::USDA::NNDB is for parsing the nutrient data files made available by the
-USDA in ASCII format. If the files are not available, they will be automatically 
+USDA in ASCII format. If the files are not available, they will be automatically
 retrieved and extracted for you.
 
 =head1 METHODS
 
 =over
 
-=item B<new($basedir)>
+=item C<new($basedir)>
 
 Creates a new Parse::USDA::NNDB object. Takes one optional argument, a path
-to the dir which contains the datafiles to be parsed.
-
-=item B<open_file($table)>
-
-Call with the case-insensitive name of the file, without extension, to open.
-You must call this before B<get_line>.
-
-Returns true on success.
-
-=item B<get_line>
-
-After B<open_file>, keep calling this to get the next line. Each line is a
-hashref (see USDA docs for their meanings).
-
-Returns undef when the file is finished or if something goes wrong.
-
-=item B<tables>
-
-Returns a list of all the known tables/filenames.
-
-=item B<get_columns_for($table)>
-
-Returns a list of the keys used in this file.
-
-=back
+to the dir which will store the datafiles to be parsed.
 
 =head1 SEE ALSO
 

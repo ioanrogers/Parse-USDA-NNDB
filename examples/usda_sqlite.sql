@@ -88,7 +88,7 @@ CREATE TABLE weight (
     ndb_no       TEXT NOT NULL,
     seq          TEXT NOT NULL,
     amount       REAL NOT NULL,
-    msre_desc    TEXT NOT NULL, 
+    msre_desc    TEXT NOT NULL,
     gm_wgt       REAL NOT NULL,
     num_data_pts INTEGER,
     std_dev      REAL,
@@ -100,14 +100,14 @@ CREATE TABLE footnote (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     ndb_no       TEXT NOT NULL,
     footnt_no    TEXT NOT NULL,
-    footnt_typ   TEXT NOT NULL,
-    nutr_no      TEXT, 
+    footnt_typ   TEXT, /* spec says should not be blank, but it sometimes is! */
+    nutr_no      TEXT,
     footnt_txt   TEXT NOT NULL
 );
 
 CREATE TABLE datsrcln (
     ndb_no     TEXT NOT NULL,
-    nutr_no    TEXT NOT NULL, 
+    nutr_no    TEXT NOT NULL,
     datasrc_id TEXT NOT NULL,
     PRIMARY KEY (ndb_no, nutr_no, datasrc_id),
     FOREIGN KEY(datasrc_id) REFERENCES data_src(datasrc_id)
@@ -119,7 +119,7 @@ CREATE TABLE datsrcln (
 CREATE TABLE data_src (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     datasrc_id  TEXT NOT NULL,
-    authors     TEXT, 
+    authors     TEXT,
     title       TEXT,
     year        INTEGER,
     journal     TEXT,
