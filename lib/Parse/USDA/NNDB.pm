@@ -328,15 +328,6 @@ Returns the next line in the data file and returns a hashref
 
 Returns undef when the file is finished or if something goes wrong.
 
-=head1 METHODS
-
-=over
-
-=item C<new($basedir)>
-
-Creates a new Parse::USDA::NNDB object. Takes one optional argument, a path
-to the dir which will store the datafiles to be parsed.
-
 =head1 SEE ALSO
 
 L<USDA documentation|http://www.ars.usda.gov/Services/docs.htm?docid=8964>
@@ -404,6 +395,9 @@ Please report any bugs or feature requests at L<https://github.com/ioanrogers/Pa
 
 =head2 Source Code
 
+The code is open to the world, and available for you to hack on. Please feel free to browse it and play
+with it, or whatever. If you want to contribute patches, please send me a diff or prod me to pull
+from your repository :)
 
 L<https://github.com/ioanrogers/Parse-USDA-NNDB>
 
