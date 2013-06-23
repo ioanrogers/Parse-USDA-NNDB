@@ -319,7 +319,7 @@ and opens the file ready for parsing. You must call this before B<get_line>.
 
 Returns true on success, throws an exception on error.
 
-=item C<get_line>
+=head2 C<get_line>
 
 Returns the next line in the data file and returns a hashref
 (see USDA docs for their meanings).

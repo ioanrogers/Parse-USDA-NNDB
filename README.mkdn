@@ -50,7 +50,7 @@ and opens the file ready for parsing. You must call this before __get\_line__.
 
 Returns true on success, throws an exception on error.
 
-- `get_line`
+## `get_line`
 
 Returns the next line in the data file and returns a hashref
 (see USDA docs for their meanings).
