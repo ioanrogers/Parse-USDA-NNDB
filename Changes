@@ -1,0 +1,32 @@
+Changelog for Parse-USDA-NNDB
+
+v0.2 2013-06-23T19:22:18
+ - Don't track the tracker [Ioan Rogers]
+ - Allow passing case-insensitive table name to table() [Ioan Rogers]
+ - Added tidyall.ini, updated perl*rc files, tidied [Ioan Rogers]
+ - Using Moo and methods, fixed some bugs with data handling [Ioan Rogers]
+ - Fix pod formatting [Ioan Rogers]
+ - Make weaver add source and bugs [Ioan Rogers]
+ - Readme from POD [Ioan Rogers]
+ - Basic docs [Ioan Rogers]
+ - Tidied and fixed abstract because I couldn't remember why I called it
+   NNDB [Ioan Rogers]
+ - Better error handling and logging [Ioan Rogers]
+ - Ignore test db [Ioan Rogers]
+ - Changed api, RSS from >1GB to <1MB [Ioan Rogers]
+ - Added example script for converting ascii to sqlite [Ioan Rogers]
+ - Read ascii files with encoding, fixes units in nutr_def (and probably
+   more!) [Ioan Rogers]
+ - Support langua files, get_columns returns only arrayref [Ioan Rogers]
+ - Using new sr24 release, added link to USDA page, return undef for empty
+   fields [Ioan Rogers]
+ - tidied [Ioan Rogers]
+ - Logging support via Log::Any [Ioan Rogers]
+ - Improved tidy and critic configs [Ioan Rogers]
+ - Improved dzil conf [Ioan Rogers]
+ - TimeTracker project [Ioan Rogers]
+ - New dist.ini [Ioan Rogers]
+ - Removed some uneeded stuff [Ioan Rogers]
+ - Removed some uneeded stuff [Ioan Rogers]
+ - Initial import [Ioan Rogers]
+

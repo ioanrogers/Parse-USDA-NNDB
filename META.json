@@ -1,0 +1,72 @@
+{
+   "abstract" : "download and parse the latest USDA National Nutrient Database",
+   "author" : [
+      "Ioan Rogers <ioanr@cpan.org>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Dist::Zilla version 4.300035, CPAN::Meta::Converter version 2.131560",
+   "license" : [
+      "artistic_2"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Parse-USDA-NNDB",
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "Module::Build::Tiny" : "0.023"
+         }
+      },
+      "develop" : {
+         "requires" : {
+            "Pod::Coverage::TrustPod" : "0",
+            "Test::CPAN::Changes" : "0.19",
+            "Test::Pod" : "1.41",
+            "Test::Pod::Coverage" : "1.08"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/ioanrogers/Parse-USDA-NNDB/issues"
+      },
+      "homepage" : "http://metacpan.org/release/Parse-USDA-NNDB/",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/ioanrogers/Parse-USDA-NNDB.git",
+         "web" : "https://github.com/ioanrogers/Parse-USDA-NNDB"
+      }
+   },
+   "version" : "0.2",
+   "x_BuiltWith" : {
+      "modules" : {
+         "Module::Build::Tiny" : "0.023",
+         "Pod::Coverage::TrustPod" : "0.100002",
+         "Test::CPAN::Changes" : "0.20",
+         "Test::Pod" : "1.48",
+         "Test::Pod::Coverage" : "1.08"
+      },
+      "perl" : {
+         "original" : "v5.18.0",
+         "qv" : 1,
+         "version" : [
+            5,
+            18,
+            0
+         ]
+      },
+      "perl-config" : {
+         "gccversion" : "4.2.1 Compatible Debian Clang 3.3 (trunk)",
+         "myarchname" : "x86_64-linux",
+         "osname" : "linux"
+      },
+      "platform" : "linux"
+   },
+   "x_contributors" : [
+      "Ioan Rogers <ioan.rogers@gmail.com>"
+   ]
+}
+

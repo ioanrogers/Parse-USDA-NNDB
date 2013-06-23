@@ -1,0 +1,79 @@
+# NAME
+
+Parse::USDA::NNDB - download and parse the latest USDA National Nutrient Database
+
+# VERSION
+
+version 0.2
+
+# SYNOPSIS
+
+    use Parse::USDA::NNDB;
+    my $usda = Parse::USDA::NNDB->new;
+    $usda->table( 'fd_group' );
+    while (my $fg = $usda->getline) {
+        printf "ID: %s  DESC: %s\n", $fg->{NDB_No}, $fg->{Shrt_Desc};
+    }
+
+# DESCRIPTION
+
+Parse::USDA::NNDB is for parsing the nutrient data files made available by the
+USDA in ASCII format. If the files are not available, they will be automatically
+retrieved and extracted for you.
+
+# METHODS
+
+## `table ($table)`
+
+Given a case-insenstive table name, this method sets the current active table
+and opens the file ready for parsing. You must call this before __get\_line__.
+
+Returns true on success, throws an exception on error.
+
+- `get_line`
+
+Returns the next line in the data file and returns a hashref
+(see USDA docs for their meanings).
+
+Returns undef when the file is finished or if something goes wrong.
+
+This is ithe directory into which the data files will be downloaded.
+Defaults to $HOME/.cache/usda\_nndb
+
+An arrayref of all the known tables.
+
+Returns an arrayref of the column names used in this table, or undef if the
+table is unknown
+
+# METHODS
+
+- `new($basedir)`
+
+    Creates a new Parse::USDA::NNDB object. Takes one optional argument, a path
+    to the dir which will store the datafiles to be parsed.
+
+    # SEE ALSO
+
+    [USDA documentation](http://www.ars.usda.gov/Services/docs.htm?docid=8964)
+
+    # BUGS AND LIMITATIONS
+
+    You can make new bug reports, and view existing ones, through the
+    web interface at [https://github.com/ioanrogers/Parse-USDA-NNDB/issues](https://github.com/ioanrogers/Parse-USDA-NNDB/issues).
+
+    # SOURCE
+
+    The development version is on github at [http://github.com/ioanrogers/Parse-USDA-NNDB](http://github.com/ioanrogers/Parse-USDA-NNDB)
+    and may be cloned from [git://github.com/ioanrogers/Parse-USDA-NNDB.git](git://github.com/ioanrogers/Parse-USDA-NNDB.git)
+
+    # AUTHOR
+
+    Ioan Rogers <ioanr@cpan.org>
+
+    # COPYRIGHT AND LICENSE
+
+    This software is Copyright (c) 2013 by Ioan Rogers.
+
+    This is free software, licensed under:
+
+        The Artistic License 2.0 (GPL Compatible)
