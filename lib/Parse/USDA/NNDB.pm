@@ -261,7 +261,7 @@ __END__
 
 =encoding utf-8
 
-=for :stopwords Ioan Rogers <ioan.rogers@gmail.com>
+=for :stopwords Ioan Rogers
 
 =head1 NAME
 
