@@ -343,6 +343,11 @@ The latest version of this module is available from the Comprehensive Perl
 Archive Network (CPAN). Visit L<http://www.perl.com/CPAN/> to find a CPAN
 site near you, or see L<https://metacpan.org/module/Parse::USDA::NNDB/>.
 
+=head1 SOURCE
+
+The development version is on github at L<http://github.com/ioanrogers/Parse-USDA-NNDB>
+and may be cloned from L<git://github.com/ioanrogers/Parse-USDA-NNDB.git>
+
 =head1 AUTHOR
 
 Ioan Rogers <ioanr@cpan.org>

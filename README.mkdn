@@ -74,6 +74,11 @@ The latest version of this module is available from the Comprehensive Perl
 Archive Network (CPAN). Visit [http://www.perl.com/CPAN/](http://www.perl.com/CPAN/) to find a CPAN
 site near you, or see [https://metacpan.org/module/Parse::USDA::NNDB/](https://metacpan.org/module/Parse::USDA::NNDB/).
 
+# SOURCE
+
+The development version is on github at [http://github.com/ioanrogers/Parse-USDA-NNDB](http://github.com/ioanrogers/Parse-USDA-NNDB)
+and may be cloned from [git://github.com/ioanrogers/Parse-USDA-NNDB.git](git://github.com/ioanrogers/Parse-USDA-NNDB.git)
+
 # AUTHOR
 
 Ioan Rogers <ioanr@cpan.org>
