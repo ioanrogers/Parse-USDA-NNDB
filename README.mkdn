@@ -61,62 +61,18 @@ Returns undef when the file is finished or if something goes wrong.
 
 [USDA documentation](http://www.ars.usda.gov/Services/docs.htm?docid=8964)
 
-# SUPPORT
+# BUGS AND LIMITATIONS
 
-## Perldoc
+You can make new bug reports, and view existing ones, through the
+web interface at [https://github.com/ioanrogers/Parse-USDA-NNDB/issues](https://github.com/ioanrogers/Parse-USDA-NNDB/issues).
 
-You can find documentation for this module with the perldoc command.
+# AVAILABILITY
 
-    perldoc Parse::USDA::NNDB
+The project homepage is [http://metacpan.org/release/Parse-USDA-NNDB/](http://metacpan.org/release/Parse-USDA-NNDB/).
 
-## Websites
-
-The following websites have more information about this module, and may be of help to you. As always,
-in addition to those websites please use your favorite search engine to discover more resources.
-
-- Search CPAN
-
-    The default CPAN search engine, useful to view POD in HTML format.
-
-    [http://search.cpan.org/dist/Parse-USDA-NNDB](http://search.cpan.org/dist/Parse-USDA-NNDB)
-
-- CPAN Ratings
-
-    The CPAN Ratings is a website that allows community ratings and reviews of Perl modules.
-
-    [http://cpanratings.perl.org/d/Parse-USDA-NNDB](http://cpanratings.perl.org/d/Parse-USDA-NNDB)
-
-- CPAN Testers
-
-    The CPAN Testers is a network of smokers who run automated tests on uploaded CPAN distributions.
-
-    [http://www.cpantesters.org/distro/P/Parse-USDA-NNDB](http://www.cpantesters.org/distro/P/Parse-USDA-NNDB)
-
-- CPAN Testers Matrix
-
-    The CPAN Testers Matrix is a website that provides a visual overview of the test results for a distribution on various Perls/platforms.
-
-    [http://matrix.cpantesters.org/?dist=Parse-USDA-NNDB](http://matrix.cpantesters.org/?dist=Parse-USDA-NNDB)
-
-- CPAN Testers Dependencies
-
-    The CPAN Testers Dependencies is a website that shows a chart of the test results of all dependencies for a distribution.
-
-    [http://deps.cpantesters.org/?module=Parse::USDA::NNDB](http://deps.cpantesters.org/?module=Parse::USDA::NNDB)
-
-## Bugs / Feature Requests
-
-Please report any bugs or feature requests at [https://github.com/ioanrogers/Parse-USDA-NNDB/issues](https://github.com/ioanrogers/Parse-USDA-NNDB/issues). You will be automatically notified of any progress.
-
-## Source Code
-
-The code is open to the world, and available for you to hack on. Please feel free to browse it and play
-with it, or whatever. If you want to contribute patches, please send me a diff or prod me to pull
-from your repository :)
-
-[https://github.com/ioanrogers/Parse-USDA-NNDB](https://github.com/ioanrogers/Parse-USDA-NNDB)
-
-    git clone git://github.com/ioanrogers/Parse-USDA-NNDB.git
+The latest version of this module is available from the Comprehensive Perl
+Archive Network (CPAN). Visit [http://www.perl.com/CPAN/](http://www.perl.com/CPAN/) to find a CPAN
+site near you, or see [https://metacpan.org/module/Parse::USDA::NNDB/](https://metacpan.org/module/Parse::USDA::NNDB/).
 
 # AUTHOR
 
