@@ -259,6 +259,12 @@ __END__
 
 =pod
 
+=encoding utf-8
+
+=for :stopwords Ioan Rogers <ioan.rogers@gmail.com> cpan testmatrix url annocpan anno
+bugtracker rt cpants kwalitee diff irc mailto metadata placeholders
+metacpan
+
 =head1 NAME
 
 Parse::USDA::NNDB - download and parse the latest USDA National Nutrient Database
@@ -282,6 +288,30 @@ Parse::USDA::NNDB is for parsing the nutrient data files made available by the
 USDA in ASCII format. If the files are not available, they will be automatically
 retrieved and extracted for you.
 
+=head1 EXTENDS
+
+=over 4
+
+=item * L<Moo::Object>
+
+=back
+
+=head1 ATTRIBUTES
+
+=head2 C<base_dir>
+
+This is ithe directory into which the data files will be downloaded.
+Defaults to $HOME/.cache/usda_nndb
+
+=head2 C<tables>
+
+An arrayref of all the known tables.
+
+=head2 C<get_columns_for($table)>
+
+Returns an arrayref of the column names used in this table, or undef if the
+table is unknown
+
 =head1 METHODS
 
 =head2 C<table ($table)>
@@ -298,20 +328,6 @@ Returns the next line in the data file and returns a hashref
 
 Returns undef when the file is finished or if something goes wrong.
 
-=attr C<base_dir>
-
-This is ithe directory into which the data files will be downloaded.
-Defaults to $HOME/.cache/usda_nndb
-
-=attr C<tables>
-
-An arrayref of all the known tables.
-
-=attr C<get_columns_for($table)>
-
-Returns an arrayref of the column names used in this table, or undef if the
-table is unknown
-
 =head1 METHODS
 
 =over
@@ -325,15 +341,73 @@ to the dir which will store the datafiles to be parsed.
 
 L<USDA documentation|http://www.ars.usda.gov/Services/docs.htm?docid=8964>
 
-=head1 BUGS AND LIMITATIONS
+=head1 SUPPORT
 
-You can make new bug reports, and view existing ones, through the
-web interface at L<https://github.com/ioanrogers/Parse-USDA-NNDB/issues>.
+=head2 Perldoc
 
-=head1 SOURCE
+You can find documentation for this module with the perldoc command.
 
-The development version is on github at L<http://github.com/ioanrogers/Parse-USDA-NNDB>
-and may be cloned from L<git://github.com/ioanrogers/Parse-USDA-NNDB.git>
+  perldoc Parse::USDA::NNDB
+
+=head2 Websites
+
+The following websites have more information about this module, and may be of help to you. As always,
+in addition to those websites please use your favorite search engine to discover more resources.
+
+=over 4
+
+=item *
+
+Search CPAN
+
+The default CPAN search engine, useful to view POD in HTML format.
+
+L<http://search.cpan.org/dist/Parse-USDA-NNDB>
+
+=item *
+
+CPAN Ratings
+
+The CPAN Ratings is a website that allows community ratings and reviews of Perl modules.
+
+L<http://cpanratings.perl.org/d/Parse-USDA-NNDB>
+
+=item *
+
+CPAN Testers
+
+The CPAN Testers is a network of smokers who run automated tests on uploaded CPAN distributions.
+
+L<http://www.cpantesters.org/distro/P/Parse-USDA-NNDB>
+
+=item *
+
+CPAN Testers Matrix
+
+The CPAN Testers Matrix is a website that provides a visual overview of the test results for a distribution on various Perls/platforms.
+
+L<http://matrix.cpantesters.org/?dist=Parse-USDA-NNDB>
+
+=item *
+
+CPAN Testers Dependencies
+
+The CPAN Testers Dependencies is a website that shows a chart of the test results of all dependencies for a distribution.
+
+L<http://deps.cpantesters.org/?module=Parse::USDA::NNDB>
+
+=back
+
+=head2 Bugs / Feature Requests
+
+Please report any bugs or feature requests at L<https://github.com/ioanrogers/Parse-USDA-NNDB/issues>. You will be automatically notified of any progress.
+
+=head2 Source Code
+
+
+L<https://github.com/ioanrogers/Parse-USDA-NNDB>
+
+  git clone git://github.com/ioanrogers/Parse-USDA-NNDB.git
 
 =head1 AUTHOR
 
@@ -346,5 +420,28 @@ This software is Copyright (c) 2013 by Ioan Rogers.
 This is free software, licensed under:
 
   The Artistic License 2.0 (GPL Compatible)
+
+=head1 DISCLAIMER OF WARRANTY
+
+BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
+FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT
+WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER
+PARTIES PROVIDE THE SOFTWARE "AS IS" WITHOUT WARRANTY OF ANY KIND,
+EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE
+SOFTWARE IS WITH YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME
+THE COST OF ALL NECESSARY SERVICING, REPAIR, OR CORRECTION.
+
+IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
+REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE, BE LIABLE
+TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL, OR
+CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE
+SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
+RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
+FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
+SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGES.
 
 =cut
