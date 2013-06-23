@@ -326,6 +326,11 @@ Returns the next line in the data file and returns a hashref
 
 Returns undef when the file is finished or if something goes wrong.
 
+=head2 C<new($basedir)>
+
+Creates a new Parse::USDA::NNDB object. Takes one optional argument, a path
+to the dir which will store the datafiles to be parsed.
+
 =head1 SEE ALSO
 
 L<USDA documentation|http://www.ars.usda.gov/Services/docs.htm?docid=8964>
