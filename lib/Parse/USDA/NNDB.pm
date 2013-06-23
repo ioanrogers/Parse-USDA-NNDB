@@ -24,6 +24,7 @@ with qw/MooX::Log::Any/;
 
 # XXX file encoding
 # TODO use the updates rather than a whole new db
+# http://www.ars.usda.gov/SP2UserFiles/Place/12354500/Data/SR25/dnload/sr25upd.zip
 # XXX option to download old releases?
 # TODO progress bars...
 
@@ -78,6 +79,8 @@ method _build__src_uri () {
     URI->new(
         'http://www.ars.usda.gov/SP2UserFiles/Place/12354500/Data/SR24/dnload/sr24.ZIP'
     );
+
+    #http://www.ars.usda.gov/SP2UserFiles/Place/12354500/Data/SR25/dnload/sr25.zip
 }
 
 method _build__src_file () {
@@ -205,7 +208,7 @@ method table ($table) {
     return 1;
 }
 
-=item C<get_line>
+=method C<get_line>
 
 Returns the next line in the data file and returns a hashref
 (see USDA docs for their meanings).
@@ -299,15 +302,6 @@ __END__
 Parse::USDA::NNDB is for parsing the nutrient data files made available by the
 USDA in ASCII format. If the files are not available, they will be automatically
 retrieved and extracted for you.
-
-=head1 METHODS
-
-=over
-
-=item C<new($basedir)>
-
-Creates a new Parse::USDA::NNDB object. Takes one optional argument, a path
-to the dir which will store the datafiles to be parsed.
 
 =head1 SEE ALSO
 
