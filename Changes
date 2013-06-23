@@ -1,6 +1,6 @@
 Changelog for Parse-USDA-NNDB
 
-v0.2 2013-06-23T19:22:18
+v0.2 2013-06-23T20:11:53
  - Don't track the tracker [Ioan Rogers]
  - Allow passing case-insensitive table name to table() [Ioan Rogers]
  - Added tidyall.ini, updated perl*rc files, tidied [Ioan Rogers]
