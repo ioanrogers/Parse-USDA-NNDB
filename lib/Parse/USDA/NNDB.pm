@@ -312,6 +312,11 @@ table is unknown
 
 =head1 METHODS
 
+=head2 C<new($basedir)>
+
+Creates a new Parse::USDA::NNDB object. Takes one optional argument, a path
+to the dir which will store the datafiles to be parsed.
+
 =head2 C<table ($table)>
 
 Given a case-insenstive table name, this method sets the current active table
@@ -325,11 +330,6 @@ Returns the next line in the data file and returns a hashref
 (see USDA docs for their meanings).
 
 Returns undef when the file is finished or if something goes wrong.
-
-=head2 C<new($basedir)>
-
-Creates a new Parse::USDA::NNDB object. Takes one optional argument, a path
-to the dir which will store the datafiles to be parsed.
 
 =head1 SEE ALSO
 
